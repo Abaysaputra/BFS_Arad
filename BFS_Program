@@ -1,0 +1,111 @@
+#include <iostream>
+#include <map>
+#include <vector>
+#include <queue>
+
+using namespace std;
+// Daftar kota
+map<int, string> cities = {
+    {1, "Arad"}, {2, "Zerind"}, {3, "Oradea"}, {4, "Sibiu"},
+    {5, "Fagaras"}, {6, "Rimnicu Vilcea"}, {7, "Pitesti"}, {8, "Timisoara"},
+    {9, "Lugoj"}, {10, "Mehadia"}, {11, "Drobeta"}, {12, "Craiova"},
+    {13, "Bucharest"}, {14, "Giurgiu"}, {15, "Urziceni"}, {16, "Vaslui"},
+    {17, "Iasi"}, {18, "Neamt"}
+};
+//Daftar KOta sesuai dengan tree yang sudah dibuat
+map<string, vector<string>> graph = {
+    {"Arad", {"Zerind", "Sibiu", "Timisoara"}},
+    {"Zerind", {"Arad", "Oradea"}},
+    {"Oradea", {"Zerind", "Sibiu"}},
+    {"Sibiu", {"Arad", "Oradea", "Fagaras", "Rimnicu Vilcea"}},
+    {"Fagaras", {"Sibiu", "Bucharest"}},
+    {"Rimnicu Vilcea", {"Sibiu", "Pitesti", "Craiova"}},
+    {"Pitesti", {"Rimnicu Vilcea", "Craiova", "Bucharest"}},
+    {"Timisoara", {"Arad", "Lugoj"}},
+    {"Lugoj", {"Timisoara", "Mehadia"}},
+    {"Mehadia", {"Lugoj", "Drobeta"}},
+    {"Drobeta", {"Mehadia", "Craiova"}},
+    {"Craiova", {"Drobeta", "Rimnicu Vilcea", "Pitesti"}},
+    {"Bucharest", {"Fagaras", "Pitesti", "Giurgiu", "Urziceni"}},
+    {"Giurgiu", {"Bucharest"}},
+    {"Urziceni", {"Bucharest", "Vaslui", "Iasi"}},
+    {"Vaslui", {"Urziceni", "Iasi"}},
+    {"Iasi", {"Vaslui", "Neamt"}},
+    {"Neamt", {"Iasi"}}
+};
+void printCityList() {
+    cout << "Daftar Kota-Kota Di Rumanisa :\n";
+    for (const auto& city : cities) {
+        cout << city.first << ". " << city.second << "\n";
+    }
+}
+// Fungsi BFS untuk mencari rute
+vector<string> bfs(string start, string goal) {
+    queue<vector<string>> q;
+    map<string, bool> visited;
+
+    q.push({start});
+    visited[start] = true;
+
+    while (!q.empty()) {
+        vector<string> path = q.front();
+        q.pop();
+        string lastNode = path.back();
+
+        if (lastNode == goal) {
+            return path;
+        }
+
+        for (string neighbor : graph[lastNode]) {
+            if (!visited[neighbor]) {
+                vector<string> newPath = path;
+                newPath.push_back(neighbor);
+                q.push(newPath);
+                visited[neighbor] = true;
+            }
+        }
+    }
+    return {};
+}
+// Fungsi untuk mencetak rute yang ditemukan
+void printRoute(vector<string> route) {
+    if (route.empty()) {
+        cout << "Tidak ada rute yang ditemukan.\n";
+        return;
+    }
+    cout << "Rute ditemukan: ";
+    for (size_t i = 0; i < route.size(); i++) {
+        cout << route[i];
+        if (i != route.size() - 1) cout << " -> ";
+    }
+    cout << "\n";
+}
+// Fungsi Main
+int main() {
+    while (true) {
+        printCityList();
+        
+        int startCity, goalCity;
+        cout << "\nMasukkan nomor awal pada kota: ";
+        cin >> startCity;
+        cout << "Masukkan tujuan kota: ";
+        cin >> goalCity;
+
+        if (cities.find(startCity) == cities.end() || cities.find(goalCity) == cities.end()) {
+            cout << "Input yang anda masukkan nggak valid, coba lagi.\n";
+            continue;
+        }
+
+        string start = cities[startCity];
+        string goal = cities[goalCity];
+
+        vector<string> route = bfs(start, goal);
+        printRoute(route);
+
+        char again;
+        cout << " Apa Anda Ingin melakukan pencarian lagi? (y/n): ";
+        cin >> again;
+        if (again == 'n' || again == 'N') break;
+    }
+    return 0;
+}
